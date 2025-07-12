@@ -23,7 +23,19 @@
 }
 
 html {
-    font-size: 24px;
+    font-size: 18px; /* Smaller base for mobile */
+}
+
+@media (min-width: 768px) {
+    html {
+        font-size: 20px; /* Larger on desktop */
+    }
+}
+
+@media (min-width: 1024px) {
+    html {
+        font-size: 24px; /* Your target size on large screens */
+    }
 }
 
 body {
