@@ -1,0 +1,51 @@
+name: Deploy subfolder to GitHub Pages
+
+on:
+    workflow_dispatch:
+        inputs:
+            subfolder:
+                description: "Name of the subfolder to publish (at repo root)"
+                required: true
+                type: string
+    push:
+        branches:
+            - main
+        # Auto-update deployed subfolder when its contents change
+        paths:
+            - "**"
+
+jobs:
+    deploy:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+
+            - name: Set subfolder name
+              id: vars
+              run: |
+                  if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+                    echo "SUBFOLDER=${{ github.event.inputs.subfolder }}" >> $GITHUB_ENV
+                  else
+                    # Auto-detect changed top-level folders (first match)
+                    CHANGED=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep '/' | cut -d/ -f1 | sort -u | head -n1)
+                    echo "SUBFOLDER=${CHANGED}" >> $GITHUB_ENV
+                  fi
+
+            - name: Exit if no subfolder detected
+              if: env.SUBFOLDER == ''
+              run: |
+                  echo "No subfolder determined from changes or input. Skipping deploy."
+                  exit 0
+
+            - name: Prepare site directory
+              run: |
+                  mkdir -p site/${{ env.SUBFOLDER }}
+                  cp -r ${{ env.SUBFOLDER }}/. site/${{ env.SUBFOLDER }}/
+
+            - name: Deploy to GitHub Pages (subfolder)
+              uses: peaceiris/actions-gh-pages@v4
+              with:
+                  github_token: ${{ secrets.GITHUB_TOKEN }}
+                  publish_dir: ./site
+                  keep_files: true
