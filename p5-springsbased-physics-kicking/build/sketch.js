@@ -6,12 +6,45 @@ const { Vec2D, Rect } = toxi.geom;
 const physics = new VerletPhysics2D();
 const particles = [];
 const springs = [];
-let direction;
+const params = {
+    numParticles: 24,
+    baseRadius: 80,
+    noiseStrength: 70,
+    noiseScale: 0.1,
+    springStrength: 0.1,
+    gravity: 0.5,
+    regenerate: () => {
+        // Clear and regenerate everything
+        setupPhysics();
+        generateParticles();
+        generateSprings();
+    },
+};
+function setupCustomControls() {
+    const ids = [
+        "numParticles",
+        "baseRadius",
+        "noiseStrength",
+        "springStrength",
+        "gravity",
+    ];
+    ids.forEach((id) => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.addEventListener("input", () => {
+                params[id] = parseFloat(el.value);
+                params.regenerate();
+            });
+        }
+    });
+    const btn = document.getElementById("regenerate");
+    if (btn)
+        btn.addEventListener("click", params.regenerate);
+}
 function setup() {
-    createCanvas(640, 360);
-    setupPhysics();
-    generateParticles();
-    generateSprings();
+    createCanvas(720, 560).parent("canvas-container");
+    setupCustomControls();
+    params.regenerate();
 }
 function draw() {
     background(255, 220, 95);
@@ -19,16 +52,19 @@ function draw() {
     renderShape();
 }
 const setupPhysics = () => {
-    physics.addBehavior(new GravityBehavior(new Vec2D(0, 0.5)));
+    physics.clear();
+    physics.addBehavior(new GravityBehavior(new Vec2D(0, params.gravity)));
     physics.setWorldBounds(new Rect(0, 0, width, height));
+    particles.length = 0;
+    springs.length = 0;
 };
 const generateParticles = () => {
-    const numParticles = 24; // Number of points around the shape
+    const numParticles = params.numParticles; // Number of points around the shape
     const centerX = width / 2;
     const centerY = height / 2;
-    const baseRadius = 80; // Average radius
-    const noiseStrength = 70; // Increase for more variation
-    const noiseScale = 0.1; // Controls how "smooth" the noise is
+    const baseRadius = params.baseRadius; // Average radius
+    const noiseStrength = params.noiseStrength; // Increase for more variation
+    const noiseScale = params.noiseScale; // Controls how "smooth" the noise is
     for (let i = 0; i < numParticles; i++) {
         const angle = (TWO_PI / numParticles) * i;
         // Use Perlin noise for smoother, more organic variation
@@ -48,7 +84,7 @@ const generateSprings = () => {
         const dx = a.x - b.x;
         const dy = a.y - b.y;
         const restLength = Math.sqrt(dx * dx + dy * dy);
-        springs.push(new Spring(a, b, restLength, 0.1, // Increase strength for more rigidity
+        springs.push(new Spring(a, b, restLength, params.springStrength, // Increase strength for more rigidity
         physics, false));
     });
     // Generate support springs
@@ -62,7 +98,7 @@ const generateSprings = () => {
                 const dx = a.x - b.x;
                 const dy = a.y - b.y;
                 const restLength = Math.sqrt(dx * dx + dy * dy);
-                springs.push(new Spring(a, b, restLength, 0.1, physics, true));
+                springs.push(new Spring(a, b, restLength, params.springStrength, physics, true));
             }
         }
     }
