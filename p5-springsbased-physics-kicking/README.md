@@ -2,6 +2,10 @@
 
 This project is an interactive physics-based sketch built with p5.js, demonstrating spring and particle dynamics. Users can adjust parameters such as particle radius, placement randomness, spring strength, and gravity in real time using a custom UI. The simulation is rendered on a canvas and is highly customizable for experimentation and learning.
 
+This is highly unoptimized so performance isn't great and settings around the minimum and maximum values are highly error prone.
+If the page breaks and regeneration doesn't fix it, a reload will. 
+Regard this more of a proof of concept than anything else.
+
 ### Features
 - Interactive controls for physics parameters
 - Real-time canvas rendering with p5.js

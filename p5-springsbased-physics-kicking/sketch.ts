@@ -50,7 +50,7 @@ function setupCustomControls() {
 }
 
 function setup() {
-    createCanvas(720, 560).parent("canvas-container");
+    createCanvas(windowWidth / 2, windowHeight / 2).parent("canvas-container");
     setupCustomControls();
     params.regenerate();
 }
@@ -58,6 +58,10 @@ function setup() {
 function draw() {
     background(255, 220, 95);
     physics.update();
+    particles.forEach((p) => {
+        p.x = constrain(p.x, 0, width);
+        p.y = constrain(p.y, 0, height);
+    });
     renderShape();
 }
 
@@ -96,6 +100,8 @@ const generateParticles = () => {
 
         const x = centerX + radius * cos(angle);
         const y = centerY + radius * sin(angle);
+        const p = new Particle(x, y, physics);
+        p.setWeight(0.3);
         particles.push(new Particle(x, y, physics));
     }
 };
@@ -149,6 +155,7 @@ const generateSprings = () => {
 };
 
 const renderShape = () => {
+    if (!particles.length) return;
     fill(255);
     noStroke();
 

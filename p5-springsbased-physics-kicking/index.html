@@ -4,7 +4,7 @@
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-        <title>Sketch</title>
+        <title>Springy</title>
         <!-- tailwindcss v4.0.0 CDN -->
         <link
             href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
@@ -22,10 +22,10 @@
         <script src="./build/spring.js"></script>
         <script src="./build/sketch.js"></script>
 
-        <div class="flex mx-32 mt-32">
+        <div class="flex flex-col justify-center md:flex-row md:mx-32 md:mt-32">
             <div
                 id="controls"
-                class="grid grid-cols-2 gap-4 items-start p-4 bg-gray-50 rounded-lg shadow-md max-w-xl mr-auto">
+                class="grid grid-cols-2 gap-4 items-start p-4 bg-gray-50 rounded-lg shadow-md max-w-xl md:mr-auto">
                 <label class="flex flex-col gap-1">
                     <span class="font-medium text-sm mb-1">Particle Count</span>
                     <input
