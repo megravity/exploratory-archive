@@ -9,10 +9,12 @@ const springs = [];
 const params = {
     numParticles: 24,
     baseRadius: 80,
-    noiseStrength: 70,
+    noiseStrength: 50,
     noiseScale: 0.1,
     springStrength: 0.1,
     gravity: 0.5,
+    mouseForce: 0.5,
+    mouseRadius: 50,
     regenerate: () => {
         // Clear and regenerate everything
         setupPhysics();
@@ -25,8 +27,11 @@ function setupCustomControls() {
         "numParticles",
         "baseRadius",
         "noiseStrength",
+        "noiseScale",
         "springStrength",
         "gravity",
+        "mouseForce",
+        "mouseRadius",
     ];
     ids.forEach((id) => {
         const el = document.getElementById(id);
@@ -168,7 +173,7 @@ const applyForceToNearbyParticles = (radius, strength) => {
         let distance = Math.sqrt(dx * dx + dy * dy);
         if (distance <= radius) {
             // Optionally scale force so closer particles get more force
-            let scaledStrength = strength * (10 - distance / radius) * -1;
+            let scaledStrength = strength * (20 - distance / radius) * -1;
             let fx = dx * scaledStrength;
             let fy = dy * scaledStrength;
             let force = new Vec2D(fx, fy);
@@ -177,5 +182,5 @@ const applyForceToNearbyParticles = (radius, strength) => {
     }
 };
 function mousePressed() {
-    applyForceToNearbyParticles(70, 0.5);
+    applyForceToNearbyParticles(params.mouseRadius, params.mouseForce);
 }
