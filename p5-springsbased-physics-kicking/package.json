@@ -10,6 +10,8 @@
     "license": "ISC",
     "description": "",
     "dependencies": {
+        "@types/dat.gui": "^0.7.13",
+        "dat.gui": "^0.7.9",
         "typescript": "^5.8.3"
     },
     "devDependencies": {
