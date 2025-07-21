@@ -7,13 +7,6 @@ on:
                 description: "Name of the subfolder to publish (at repo root)"
                 required: true
                 type: string
-    push:
-        branches:
-            - main
-        # Auto-update deployed subfolder when its contents change
-        paths:
-            - "**"
-
 jobs:
     deploy:
         runs-on: ubuntu-latest
