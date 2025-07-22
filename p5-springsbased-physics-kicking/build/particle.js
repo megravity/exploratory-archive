@@ -1,5 +1,4 @@
 "use strict";
-/// <reference types="p5/global" />
 class Particle extends toxi.physics2d.VerletParticle2D {
     constructor(x, y, physics, r = 8) {
         super(x, y);

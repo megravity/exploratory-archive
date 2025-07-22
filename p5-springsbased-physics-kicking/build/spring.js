@@ -1,5 +1,4 @@
 "use strict";
-/// <reference types="p5/global" />
 class Spring extends toxi.physics2d.VerletSpring2D {
     constructor(a, b, length, strength, physics, support) {
         super(a, b, length, strength);

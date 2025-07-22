@@ -1,5 +1,4 @@
 "use strict";
-/// <reference types="p5/global" />
 const { VerletPhysics2D, VerletParticle2D, VerletSpring2D } = toxi.physics2d;
 const { GravityBehavior } = toxi.physics2d.behaviors;
 const { Vec2D, Rect } = toxi.geom;
