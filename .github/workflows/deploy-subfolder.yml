@@ -18,6 +18,8 @@ on:
     paths:
       - '**'
       - 'p5-springsbased-physics-kicking/**'
+    paths-ignore:
+      - '.github/workflows/**'
 
 jobs:
   deploy:
