@@ -16,10 +16,7 @@ on:
     #   - '**' (as below) means ANY file change in the repository will trigger the workflow.
     #   - 'p5-springsbased-physics-kicking/**' means pushes affecting this subfolder will trigger the workflow.
     paths:
-      - '**'
       - 'p5-springsbased-physics-kicking/**'
-    paths-ignore:
-      - '.github/workflows/**'
 
 jobs:
   deploy:
