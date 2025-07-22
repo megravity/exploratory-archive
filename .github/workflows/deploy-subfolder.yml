@@ -1,4 +1,4 @@
-name: Deploy subfolder to GitHub Pages
+name: Deploy subfolder and README to gh-pages
 
 on:
   workflow_dispatch:
@@ -7,43 +7,49 @@ on:
         description: 'Subfolder to deploy (relative to repo root)'
         required: true
   push:
-    # Add your subfolders here for automatic deployment on change
     paths:
-      - 'p5-springsbased-physics-kicking/**'
-      # Add more subfolders as needed
-      # - 'another-subfolder/**'
+      - '**'
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      # Determine which subfolder to deploy
-      - name: Set subfolder variable
-        id: vars
+      # Fetch the existing gh-pages branch
+      - name: Fetch gh-pages
         run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            echo "SUBFOLDER=${{ github.event.inputs.subfolder }}" >> $GITHUB_ENV
-          else
-            # Auto-detect the subfolder that changed, fallback to default if needed
-            CHANGED=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep '/' | cut -d/ -f1 | sort -u | head -n1)
-            echo "SUBFOLDER=${CHANGED:-p5-springsbased-physics-kicking}" >> $GITHUB_ENV
+          git fetch origin gh-pages:gh-pages || true
+
+      # Prepare deployment folder with existing content
+      - name: Prepare deployment folder
+        run: |
+          mkdir gh-pages-content
+          if git rev-parse --verify gh-pages; then
+            git --work-tree=gh-pages-content checkout gh-pages -- .
           fi
 
-      # Prepare the site directory
-      - name: Copy subfolder contents to site directory
+      # Copy the selected subfolder for deployment
+      - name: Copy subfolder for deployment
         run: |
-          rm -rf site
-          mkdir site
-          cp -r $SUBFOLDER/. site/
+          rm -rf gh-pages-content/${{ github.event.inputs.subfolder }}
+          cp -r ${{ github.event.inputs.subfolder }} gh-pages-content/
 
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v4
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_branch: gh-pages
-          publish_dir: ./site
-          destination_dir: ""   # Ensure deploys to root, not a subdirectory
+      # Copy README.md as index.md to root for GitHub Pages
+      - name: Copy README as index.md
+        run: |
+          cp README.md gh-pages-content/index.md
+
+      # Commit and push
+      - name: Publish to gh-pages
+        run: |
+          cd gh-pages-content
+          git init
+          git config user.name "${{ github.actor }}"
+          git config user.email "${{ github.actor }}@users.noreply.github.com"
+          git add .
+          git commit -m "Update ${{ github.event.inputs.subfolder }} and root README"
+          git branch -M gh-pages
+          git remote add origin https://github.com/${{ github.repository }}.git
+          git push --force origin gh-pages
