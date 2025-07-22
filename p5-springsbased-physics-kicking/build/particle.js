@@ -1,5 +1,4 @@
 "use strict";
-/// <reference path="./types.d.ts" />
 /// <reference types="p5/global" />
 class Particle extends toxi.physics2d.VerletParticle2D {
     constructor(x, y, physics, r = 8) {

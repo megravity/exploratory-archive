@@ -1,6 +1,9 @@
 // Type definitions for toxiclibs physics2d classes
 // Based on Java documentation from https://shiffman.github.io/toxiclibs-javadocs/
 
+/// <reference types="p5" />
+/// <reference types="p5/global" />
+
 declare namespace toxi {
     namespace geom {
         class Vec2D {

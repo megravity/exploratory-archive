@@ -1,5 +1,4 @@
 /// <reference types="p5/global" />
-/// <reference path="./types.d.ts" />
 
 class Spring extends toxi.physics2d.VerletSpring2D {
     support: boolean;

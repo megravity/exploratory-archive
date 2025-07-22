@@ -12,8 +12,7 @@
   },
   "include": [
     "**/*.ts",
-    "types.d.ts",
-    "./*.ts"
+    "**/*.d.ts",
   ],
   "exclude": []
 }

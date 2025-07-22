@@ -1,5 +1,4 @@
 /// <reference types="p5/global" />
-/// <reference path="./types.d.ts" />
 
 const { VerletPhysics2D, VerletParticle2D, VerletSpring2D } = toxi.physics2d;
 const { GravityBehavior } = toxi.physics2d.behaviors;
