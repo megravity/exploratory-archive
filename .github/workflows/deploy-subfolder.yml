@@ -1,44 +1,49 @@
 name: Deploy subfolder to GitHub Pages
 
 on:
-    workflow_dispatch:
-        inputs:
-            subfolder:
-                description: "Name of the subfolder to publish (at repo root)"
-                required: true
-                type: string
+  workflow_dispatch:
+    inputs:
+      subfolder:
+        description: 'Subfolder to deploy (relative to repo root)'
+        required: true
+  push:
+    # Add your subfolders here for automatic deployment on change
+    paths:
+      - 'p5-springsbased-physics-kicking/**'
+      # Add more subfolders as needed
+      # - 'another-subfolder/**'
+
 jobs:
-    deploy:
-        runs-on: ubuntu-latest
-        steps:
-            - name: Checkout repository
-              uses: actions/checkout@v4
+  deploy:
+    runs-on: ubuntu-latest
 
-            - name: Set subfolder name
-              id: vars
-              run: |
-                  if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-                    echo "SUBFOLDER=${{ github.event.inputs.subfolder }}" >> $GITHUB_ENV
-                  else
-                    # Auto-detect changed top-level folders (first match)
-                    CHANGED=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep '/' | cut -d/ -f1 | sort -u | head -n1)
-                    echo "SUBFOLDER=${CHANGED}" >> $GITHUB_ENV
-                  fi
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-            - name: Exit if no subfolder detected
-              if: env.SUBFOLDER == ''
-              run: |
-                  echo "No subfolder determined from changes or input. Skipping deploy."
-                  exit 0
+      # Determine which subfolder to deploy
+      - name: Set subfolder variable
+        id: vars
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "SUBFOLDER=${{ github.event.inputs.subfolder }}" >> $GITHUB_ENV
+          else
+            # Auto-detect the subfolder that changed, fallback to default if needed
+            CHANGED=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep '/' | cut -d/ -f1 | sort -u | head -n1)
+            echo "SUBFOLDER=${CHANGED:-p5-springsbased-physics-kicking}" >> $GITHUB_ENV
+          fi
 
-            - name: Prepare site directory
-              run: |
-                  mkdir -p site/${{ env.SUBFOLDER }}
-                  cp -r ${{ env.SUBFOLDER }}/. site/${{ env.SUBFOLDER }}/
+      # Prepare the site directory
+      - name: Copy subfolder contents to site directory
+        run: |
+          rm -rf site
+          mkdir site
+          cp -r $SUBFOLDER/. site/
 
-            - name: Deploy to GitHub Pages (subfolder)
-              uses: peaceiris/actions-gh-pages@v4
-              with:
-                  github_token: ${{ secrets.GITHUB_TOKEN }}
-                  publish_dir: ./site
-                  keep_files: true
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: ./site
+          destination_dir: ""   # Ensure deploys to root, not a subdirectory
