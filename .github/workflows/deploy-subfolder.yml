@@ -28,14 +28,19 @@ jobs:
             - name: Determine subfolder to build/deploy
               id: subfolder
               run: |
-                  if [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ]; then
-                    echo "subfolder=$INPUT_SUBFOLDER" >> $GITHUB_OUTPUT
+                  if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+                    echo "subfolder=${{ github.event.inputs.subfolder }}" >> $GITHUB_OUTPUT
                   else
-                    # Only relevant subfolders will trigger this workflow due to the 'paths' filter above.
-                    # Find the first-level directory of the first changed file in the push.
                     CHANGED=$(git diff --name-only "$GITHUB_EVENT_BEFORE" "$GITHUB_SHA" | head -n1)
                     TOPLEVEL=$(echo "$CHANGED" | cut -d/ -f1)
                     echo "subfolder=$TOPLEVEL" >> $GITHUB_OUTPUT
+                  fi
+
+            - name: Fail if subfolder is empty
+              run: |
+                  if [ -z "${{ steps.subfolder.outputs.subfolder }}" ]; then
+                    echo "Subfolder could not be determined."
+                    exit 1
                   fi
 
             - name: Install subproject dependencies
