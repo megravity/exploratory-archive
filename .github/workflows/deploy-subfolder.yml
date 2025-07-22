@@ -44,7 +44,8 @@ jobs:
         run: |
           mkdir gh-pages-content
           if git rev-parse --verify gh-pages; then
-            git --work-tree=gh-pages-content checkout gh-pages -- .
+            # If gh-pages branch exists, checkout its content (ignore error if empty)
+            git --work-tree=gh-pages-content checkout gh-pages -- . || true
           fi
 
       # Copy the selected subfolder for deployment
