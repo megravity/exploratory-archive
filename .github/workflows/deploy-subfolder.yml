@@ -1,78 +1,76 @@
 name: Deploy subfolder and README to gh-pages
 
 on:
-  # workflow_dispatch allows you to trigger the workflow manually from the Actions tab
-  workflow_dispatch:
-    inputs:
-      subfolder:
-        description: 'Subfolder to deploy (relative to repo root)'
-        required: true
-  push:
-    # The paths: key determines which files or folders will trigger this workflow on push events.
-    # You can use glob patterns to restrict the workflow to run only when changes are made to specific files or folders.
-    # For example:
-    #   - 'docs/**' runs the workflow when anything in the docs/ folder changes.
-    #   - '*.md' runs the workflow when any Markdown file at the repo root changes.
-    #   - '**' (as below) means ANY file change in the repository will trigger the workflow.
-    #   - 'p5-springsbased-physics-kicking/**' means pushes affecting this subfolder will trigger the workflow.
-    paths:
-      - 'p5-springsbased-physics-kicking/**'
+    workflow_dispatch:
+        inputs:
+            subfolder:
+                description: "Subfolder to deploy (relative to repo root)"
+                required: true
+    push:
+        paths:
+            - "p5-springsbased-physics-kicking/**"
 
 jobs:
-  deploy:
-    runs-on: ubuntu-latest
+    deploy:
+        runs-on: ubuntu-latest
 
-    steps:
-      - uses: actions/checkout@v4
+        steps:
+            - uses: actions/checkout@v4
 
-      - name: Validate subfolder input
-        if: github.event_name == 'workflow_dispatch'
-        run: |
-          if [ -z "${{ github.event.inputs.subfolder }}" ]; then
-            echo "ERROR: subfolder input is required."
-            exit 1
-          fi
+            - name: Set up Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: "20"
 
-      # Fetch the existing gh-pages branch
-      - name: Fetch gh-pages
-        run: |
-          git fetch origin gh-pages:gh-pages || true
+            - name: Install root dependencies
+              run: npm install
 
-      # Prepare deployment folder with existing content
-      - name: Prepare deployment folder
-        run: |
-          mkdir gh-pages-content
-          if git rev-parse --verify gh-pages; then
-            # If gh-pages branch exists, checkout its content (ignore error if empty)
-            git --work-tree=gh-pages-content checkout gh-pages -- . || true
-          fi
+            - name: Determine subfolder to build/deploy
+              id: subfolder
+              run: |
+                  if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+                    echo "subfolder=${{ github.event.inputs.subfolder }}" >> $GITHUB_OUTPUT
+                  else
+                    # Only relevant subfolders will trigger this workflow due to the 'paths' filter above.
+                    # Find the first-level directory of the first changed file in the push.
+                    # This is safe, because only allowed subfolders are included in the trigger.
+                    CHANGED=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | head -n1)
+                    TOPLEVEL=$(echo "$CHANGED" | cut -d/ -f1)
+                    echo "subfolder=$TOPLEVEL" >> $GITHUB_OUTPUT
+                  fi
 
-      # Copy the selected subfolder for deployment
-      - name: Copy subfolder for deployment
-        run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            rm -rf gh-pages-content/${{ github.event.inputs.subfolder }}
-            cp -r "${{ github.event.inputs.subfolder }}" gh-pages-content/
-          else
-            # Default subfolder for push triggers
-            rm -rf gh-pages-content/p5-springsbased-physics-kicking
-            cp -r p5-springsbased-physics-kicking gh-pages-content/
-          fi
+            - name: Build only the subfolder
+              run: node scripts/build.js "${{ steps.subfolder.outputs.subfolder }}"
 
-      # Copy README.md as index.md to root for GitHub Pages
-      - name: Copy README as index.md
-        run: |
-          cp README.md gh-pages-content/index.md
+            - name: Fetch gh-pages
+              run: |
+                  git fetch origin gh-pages:gh-pages || true
 
-      # Commit and push
-      - name: Publish to gh-pages
-        run: |
-          cd gh-pages-content
-          git init
-          git config user.name "${{ github.actor }}"
-          git config user.email "${{ github.actor }}@users.noreply.github.com"
-          git add .
-          git commit -m "Update subfolder and root README"
-          git branch -M gh-pages
-          git remote add origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
-          git push --force origin gh-pages
+            - name: Prepare deployment folder
+              run: |
+                  mkdir gh-pages-content
+                  if git rev-parse --verify gh-pages; then
+                    git --work-tree=gh-pages-content checkout gh-pages -- . || true
+                  fi
+
+            - name: Copy subfolder for deployment
+              run: |
+                  SUBFOLDER="${{ steps.subfolder.outputs.subfolder }}"
+                  rm -rf "gh-pages-content/$SUBFOLDER"
+                  cp -r "$SUBFOLDER" gh-pages-content/
+
+            - name: Copy README as index.md
+              run: |
+                  cp README.md gh-pages-content/index.md
+
+            - name: Publish to gh-pages
+              run: |
+                  cd gh-pages-content
+                  git init
+                  git config user.name "${{ github.actor }}"
+                  git config user.email "${{ github.actor }}@users.noreply.github.com"
+                  git add .
+                  git commit -m "Update subfolder and root README"
+                  git branch -M gh-pages
+                  git remote add origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+                  git push --force origin gh-pages
