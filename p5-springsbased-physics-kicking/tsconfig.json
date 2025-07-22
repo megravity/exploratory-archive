@@ -1,5 +1,5 @@
 {
-      "compilerOptions": {
+  "compilerOptions": {
     "target": "es6",
     "module": "none",
     "outDir": "./build/",
@@ -8,14 +8,12 @@
     "noEmitOnError": true,
     "allowJs": true,
     "checkJs": false,
-
+    "types": ["p5", "p5/global"]
   },
   "include": [
     "**/*.ts",
-    "types.d.ts", 
+    "types.d.ts",
     "./*.ts"
   ],
-
   "exclude": []
-
 }

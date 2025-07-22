@@ -1,5 +1,5 @@
-/// <reference path="./types.d.ts" />
 /// <reference types="p5/global" />
+/// <reference path="./types.d.ts" />
 
 class Particle extends toxi.physics2d.VerletParticle2D {
     r: number;

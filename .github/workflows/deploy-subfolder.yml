@@ -33,11 +33,16 @@ jobs:
                   else
                     # Only relevant subfolders will trigger this workflow due to the 'paths' filter above.
                     # Find the first-level directory of the first changed file in the push.
-                    # This is safe, because only allowed subfolders are included in the trigger.
                     CHANGED=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | head -n1)
                     TOPLEVEL=$(echo "$CHANGED" | cut -d/ -f1)
                     echo "subfolder=$TOPLEVEL" >> $GITHUB_OUTPUT
                   fi
+
+            - name: Install subproject dependencies
+              run: |
+                  cd "${{ steps.subfolder.outputs.subfolder }}"
+                  npm install
+                  cd ..
 
             - name: Build only the subfolder
               run: node scripts/build.js "${{ steps.subfolder.outputs.subfolder }}"
