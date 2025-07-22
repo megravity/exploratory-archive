@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "target": "es6",
+    "module": "none",
+    "outDir": "./build/",
+    "rootDir": "./",
+    "strict": true,
+    "noEmitOnError": true,
+    "allowJs": true,
+    "checkJs": false
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.d.ts",
+  ],
+  "exclude": []
+}

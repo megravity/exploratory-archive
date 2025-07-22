@@ -1,0 +1,18 @@
+{
+    "name": "p5",
+    "version": "1.0.0",
+    "main": "sketch.js",
+    "scripts": {
+        "build": "tsc",
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "author": "Marvin Deutz",
+    "license": "ISC",
+    "description": "",
+    "dependencies": {
+        "@types/dat.gui": "^0.7.13",
+        "@types/p5": "^1.7.6",
+        "dat.gui": "^0.7.9",
+        "typescript": "^5.8.3"
+    }
+}
